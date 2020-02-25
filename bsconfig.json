@@ -1,0 +1,36 @@
+{
+  "name": "requin",
+  "refmt": 3,
+  "version": "0.1.0",
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    },
+    {
+      "dir": "__tests__",
+      "subdirs": true,
+      "type": "dev"
+    }
+  ],
+  "warnings": {
+    "number": "+A-4-42-48",
+    "error": "+A-3-30-32-40-44-102"
+  },
+  "suffix": ".bs.js",
+  "package-specs": {
+    "module": "commonjs",
+    "in-source": true
+  },
+  "gentypeconfig": {
+    "language": "typescript",
+    "module": "commonjs",
+    "exportInterfaces": true,
+    "shims": {}
+  },
+  "bs-dependencies": [
+    "bs-abstract",
+    "relude"
+  ],
+  "bs-dev-dependencies": ["@glennsl/bs-jest"]
+}
