@@ -20,12 +20,15 @@ let map = (s, f) => s |> Set.toArray |> Array.map(f) |> Set.fromArray(S.id);
 
 let eq = (a, b) =>
   switch (a, b) {
+  | (`Zero, `Zero) => true
+  | (`One, `One) => true
   | (`Literal(id), `Literal(id')) => String.eq(id, id')
   | (`And(es), `And(es'))
   | (`Or(es), `Or(es')) => Set.eq(es, es')
   | (`Literal(_), _)
   | (`And(_), _)
   | (`Or(_), _) => false
+  | _ => false
   };
 
 module Eq: BsAbstract.Interface.EQ with type t = t = {
@@ -38,12 +41,23 @@ include Relude_Extensions_Eq.EqInfix(Eq);
 
 let rec toString: t => string =
   fun
+  | `Zero => "0"
+  | `One => "1"
   | `Literal(id) => id
   | `And(es) => {
-      let s = es |> Set.toArray |> Array.map(toString) |> Js'.Array.joinWith(" AND ");
+      let s =
+        es
+        |> Set.toArray
+        |> Array.map(toString)
+        |> Js'.Array.joinWith(" AND ");
       "(" ++ s ++ ")";
     }
-  | `Or(es) => es |> Set.toArray |> Array.map(toString) |> Js'.Array.joinWith(" OR ") |> (s => "(" ++ s ++ ")");
+  | `Or(es) =>
+    es
+    |> Set.toArray
+    |> Array.map(toString)
+    |> Js'.Array.joinWith(" OR ")
+    |> (s => "(" ++ s ++ ")");
 
 let show: t => string = toString;
 
@@ -59,6 +73,7 @@ let minimize = es =>
        (acc, e) => {
          let delibles =
            switch (e) {
+           | `One => acc |> Set.remove(e)
            | `Literal(_) =>
              acc
              |> Set.remove(e)
@@ -95,7 +110,12 @@ let literal = id => `Literal(id);
 
 let rec ( *** ) = (expr, expr') =>
   switch (expr, expr') {
-  | (`Literal(_) as l, `Literal(_) as l') => l |=| l' ? l : And.from([|l, l'|])
+  | (`Zero, _) => `Zero
+  | (_, `Zero) => `Zero
+  | (`One, e) => e
+  | (e, `One) => e
+  | (`Literal(_) as l, `Literal(_) as l') =>
+    l |=| l' ? l : And.from([|l, l'|])
   | (`Literal(_) as l, `And(es)) => (es |> Set.add(l))->`And
   | (`Literal(_) as l, `Or(es)) => es->(map(e => l *** e))->`Or
   | (`And(es), `Literal(_) as l) => (es |> Set.add(l))->`And
@@ -111,5 +131,7 @@ let rec ( *** ) = (expr, expr') =>
              | e => acc |> Set.add(e),
            S.empty,
          );
-    Set.length(exprs) == 1 ? exprs->Belt.Set.toArray->Belt.Array.getUnsafe(0) : `Or(minimize(exprs));
+    Set.length(exprs) == 1
+      ? exprs->Belt.Set.toArray->Belt.Array.getUnsafe(0)
+      : `Or(minimize(exprs));
   };

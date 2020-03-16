@@ -31,7 +31,14 @@ module WM = {
     ->Belt.List.forEachWithIndex((i, (k, v)) => {
         let (k', v') = (
           k->string_of_int,
-          "[" ++ (v |> List.map(Term.toString(~length?)) |> List.toArray |> Js'.Array.joinWith(", ")) ++ "]",
+          "["
+          ++ (
+            v
+            |> List.map(Term.toString(~length?))
+            |> List.toArray
+            |> Js'.Array.joinWith(", ")
+          )
+          ++ "]",
         );
         buff->Buffer.add_string(k');
         buff->Buffer.add_string(": ");
@@ -47,7 +54,8 @@ module WM = {
   };
 };
 
-let groupByHammingWeight = terms => terms |> Map.groupListBy((module WM.C), v => v |> Term.hammingWeight);
+let groupByHammingWeight = terms =>
+  terms |> Map.groupListBy((module WM.C), v => v |> Term.hammingWeight);
 
 module Memo = {
   module C =
@@ -98,7 +106,8 @@ module rec T2T: {
   let empty = Belt.Map.make(~id=(module T2T.C));
   let fromList: list((k, v)) => t = Map.fromList((module C));
   let eq: (t, t) => bool = Map.eqBy(Term.eq);
-  let show: t => string = Map.toList >> List.showBy(Tuple.showBy2(Term.toString, Term.toString));
+  let show: t => string =
+    Map.toList >> List.showBy(Tuple.showBy2(Term.toString, Term.toString));
 }
 and PIT: {
   module C = Term.S.C;
@@ -148,9 +157,11 @@ and PIT: {
          );
 
   let fromList: list((Term.t, list(Term.t))) => t =
-    List.map(((t, terms)) => (t, terms |> Set.fromList((module C)))) >> Map.fromList((module C));
+    List.map(((t, terms)) => (t, terms |> Set.fromList((module C))))
+    >> Map.fromList((module C));
 
-  let show: t => string = Map.toList >> List.showBy(Tuple.showBy2(Term.show, Term.S.show));
+  let show: t => string =
+    Map.toList >> List.showBy(Tuple.showBy2(Term.show, Term.S.show));
 
   let findEssentialPrimeImplicants =
     Map.foldLeft(
@@ -176,17 +187,21 @@ and PIT: {
                       if (Term.(m |=| minterm)) {
                         acc;
                       } else {
-                        candidates |> Set.all(flip(Set.contains, implicants)) ? Set.add(m, acc) : acc;
+                        candidates |> Set.all(flip(Set.contains, implicants))
+                          ? Set.add(m, acc) : acc;
                       },
                     Term.S.empty,
                   );
-             Set.isEmpty(dominatees) ? acc : acc |> Map.set(minterm, dominatees);
+             Set.isEmpty(dominatees)
+               ? acc : acc |> Map.set(minterm, dominatees);
            },
            empty,
          )
       |> Map.foldLeft(
            (acc, minterm, _) =>
-             acc |> Map.remove(minterm) |> Map.any((_, v) => Set.contains(minterm, v))
+             acc
+             |> Map.remove(minterm)
+             |> Map.any((_, v) => Set.contains(minterm, v))
                ? acc : acc |> Map.remove(minterm),
            pit,
          );
@@ -198,7 +213,12 @@ and PIT: {
            (acc, k, terms) =>
              terms
              |> Set.foldLeft(
-                  (acc, t) => acc |> Map.set(t, acc |> Map.getOrElse(t, Term.S.empty) |> Set.add(k)),
+                  (acc, t) =>
+                    acc
+                    |> Map.set(
+                         t,
+                         acc |> Map.getOrElse(t, Term.S.empty) |> Set.add(k),
+                       ),
                   acc,
                 ),
            empty,
@@ -206,14 +226,19 @@ and PIT: {
 
   let removePrimaryEssentialPrimeImplicants: (T2T.t, t) => t =
     (essentialPrimeImplicants, pit) => {
-      let pit' = essentialPrimeImplicants |> Map.keys |> List.foldLeft(flip(Map.remove), pit);
+      let pit' =
+        essentialPrimeImplicants
+        |> Map.keys
+        |> List.foldLeft(flip(Map.remove), pit);
       essentialPrimeImplicants
       |> Map.values
       |> List.foldLeft(
            (acc, epi) =>
              acc
              |> Map.foldLeft(
-                  (acc, minterm, pis) => pis |> Set.contains(epi) ? acc |> Map.remove(minterm) : acc,
+                  (acc, minterm, pis) =>
+                    pis |> Set.contains(epi)
+                      ? acc |> Map.remove(minterm) : acc,
                   acc,
                 ),
            pit',
@@ -231,11 +256,13 @@ and PIT: {
                  transposed
                  |> Map.foldLeft(
                       (acc, i, candidates) =>
-                        Term.(pi |!=| i) && Set.subset(candidates, minterms) ? Set.add(i, acc) : acc,
+                        Term.(pi |!=| i) && Set.subset(candidates, minterms)
+                          ? Set.add(i, acc) : acc,
                       Term.S.empty,
                     );
 
-               dominatees |> Set.isEmpty ? acc : acc |> Map.set(pi, dominatees);
+               dominatees |> Set.isEmpty
+                 ? acc : acc |> Map.set(pi, dominatees);
              },
              empty,
            );
@@ -260,10 +287,15 @@ and PIT: {
                  Term.S.empty,
                );
 
-          dominance |> Map.filter((term, _) => delibles |> Set.contains(term));
+          dominance
+          |> Map.filter((term, _) => delibles |> Set.contains(term));
         };
 
-      let delibles = dominance |> removeCodominance |> Map.values |> List.foldLeft(Set.union, Term.S.empty);
+      let delibles =
+        dominance
+        |> removeCodominance
+        |> Map.values
+        |> List.foldLeft(Set.union, Term.S.empty);
 
       pit |> Map.map(terms => Set.diff(terms, delibles));
     };
@@ -288,7 +320,12 @@ and PIT: {
             );
 
           let table' =
-            table |> (removePrimaryEssentialPrimeImplicants(epis') >> removeDominatingRows >> removeDominatingColumns);
+            table
+            |> (
+              removePrimaryEssentialPrimeImplicants(epis')
+              >> removeDominatingRows
+              >> removeDominatingColumns
+            );
           table |=| table' ? (epis', table) : loop(epis', table');
         };
 
@@ -313,6 +350,7 @@ and PIT: {
         fun
         | [] => None
         | [head, ...rest] => Some(List.foldLeft(Bool.( *** ), head, rest))
+        // | [head, ...rest] => Some(List.foldWith)
       );
     };
 
@@ -320,6 +358,8 @@ and PIT: {
     e => {
       let rec genTerms: Bool.t => list(Term.S.t) =
         fun
+        | `Zero => [Term.S.singleton(Term.zero)]
+        | `One => [Term.S.singleton(Term.one)]
         // A: only a variable.
         | `Literal(id) => [Term.S.singleton(Term.fromS(id))]
         // ABC: only a product.
@@ -349,12 +389,19 @@ and PIT: {
         fun
         | [] => Term.S.empty
         | [head, ...tail] =>
-          tail |> List.foldLeft((acc, terms) => Set.length(terms) <= Set.length(acc) ? terms : acc, head)
+          tail
+          |> List.foldLeft(
+               (acc, terms) =>
+                 Set.length(terms) <= Set.length(acc) ? terms : acc,
+               head,
+             )
       );
     };
 
   let petrick: t => Term.S.t = {
-    minimizeExpression >> Option.map(extractShortestTerms) >> Option.getOrElse(Term.S.empty);
+    minimizeExpression
+    >> Option.map(extractShortestTerms)
+    >> Option.getOrElse(Term.S.empty);
   };
 };
 
@@ -369,7 +416,12 @@ let combine: WM.t => Memo.t =
             wm
             |> Map.values
             |> List.foldLeft(
-                 (acc, terms) => terms |> List.foldLeft((acc, t) => acc |> Map.set(t, false), acc),
+                 (acc, terms) =>
+                   terms
+                   |> List.foldLeft(
+                        (acc, t) => acc |> Map.set(t, false),
+                        acc,
+                      ),
                  memo,
                );
           let (combined, m') =
@@ -377,20 +429,31 @@ let combine: WM.t => Memo.t =
             |> Map.toList
             |> List.foldLeft(
                  ((wm', memo), (weight, terms)) => {
-                   let candidates = wm |> Map.get(weight + 1) |> Option.getOrElse([]);
+                   let candidates =
+                     wm |> Map.get(weight + 1) |> Option.getOrElse([]);
                    let combine' = (term, (terms, memo) as acc, candidate) =>
                      Term.combine(term, candidate)
                      |> Option.fold(acc, combined =>
-                          ([combined, ...terms], memo |> Map.set(term, true) |> Map.set(candidate, true))
+                          (
+                            [combined, ...terms],
+                            memo
+                            |> Map.set(term, true)
+                            |> Map.set(candidate, true),
+                          )
                         );
                    let (combined, m) =
                      terms
-                     |> List.foldLeft((acc, term) => candidates |> List.foldLeft(combine'(term), acc), ([], memo));
+                     |> List.foldLeft(
+                          (acc, term) =>
+                            candidates |> List.foldLeft(combine'(term), acc),
+                          ([], memo),
+                        );
                    (
                      wm'
                      |> Map.update(
                           weight,
-                          Option.map(List.concat(combined)) >> Option.orElse(~fallback=Some(combined)),
+                          Option.map(List.concat(combined))
+                          >> Option.orElse(~fallback=Some(combined)),
                         ),
                      m,
                    );
@@ -403,7 +466,10 @@ let combine: WM.t => Memo.t =
   };
 
 let createImplicants: Memo.t => Term.S.t =
-  Map.foldLeft((acc, term, checked) => checked ? acc : acc |> Set.add(term), Term.S.empty);
+  Map.foldLeft(
+    (acc, term, checked) => checked ? acc : acc |> Set.add(term),
+    Term.S.empty,
+  );
 
 let solve: list(int) => Term.S.t =
   List.distinct((module Relude.Int.Eq))
@@ -419,5 +485,9 @@ let solve: list(int) => Term.S.t =
       |> createImplicants
       |> PIT.make(terms)
       |> PIT.reduce
-      |> (((epis, table)) => (epis |> Term.S.fromList, PIT.petrick(table)) |> uncurry2(Set.union))
+      |> (
+        ((epis, table)) =>
+          (epis |> Term.S.fromList, PIT.petrick(table))
+          |> uncurry2(Set.union)
+      )
   );

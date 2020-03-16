@@ -55,12 +55,18 @@ describe("QM", () => {
         |> Map.fromList((module Memo.C)),
       ),
       (
-        Term.[(1, [Term(1, 0), Term(4, 0)]), (2, [Term(3, 0)])] |> Map.fromList((module WM.C)),
+        Term.[(1, [Term(1, 0), Term(4, 0)]), (2, [Term(3, 0)])]
+        |> Map.fromList((module WM.C)),
         [
           Term.(Term(1, 0), true),
           Term.(Term(4, 0), false),
           Term.(Term(3, 0), true),
-          (Term.Term(1, 0) |> Term.combine(Term.Term(3, 0)) |> Option.getOrElse(Term.error), false),
+          (
+            Term.Term(1, 0)
+            |> Term.combine(Term.Term(3, 0))
+            |> Option.getOrElse(Term.error),
+            false,
+          ),
         ]
         |> Map.fromList((module Memo.C)),
       ),
@@ -148,7 +154,9 @@ describe("PIT", () => {
     },
   );
 
-  testAll("removePrimaryEssentialPrimeImplicants", [], _ => {expect(true) |> toEqual(true)});
+  testAll("removePrimaryEssentialPrimeImplicants", [], _ => {
+    expect(true) |> toEqual(true)
+  });
 
   testAll(
     "findEssentialPrimeImplicants",
@@ -162,7 +170,9 @@ describe("PIT", () => {
           (5, ["-01", "10-"]),
           (6, ["-10", "1-0"]),
         ]
-        |> List.map(((i, ss)) => (Term.Term(i, 0), List.map(Term.fromS, ss)))
+        |> List.map(((i, ss)) =>
+             (Term.Term(i, 0), List.map(Term.fromS, ss))
+           )
         |> PIT.fromList,
         T2T.empty,
       ),
@@ -190,7 +200,10 @@ describe("PIT", () => {
           (15, "1111"),
         ]
         |> List.map(((i, s)) => (i, Term.fromS(s)))
-        |> List.foldLeft((acc, (i, t)) => Belt.Map.Int.set(acc, i, t), Belt.Map.Int.empty);
+        |> List.foldLeft(
+             (acc, (i, t)) => Belt.Map.Int.set(acc, i, t),
+             Belt.Map.Int.empty,
+           );
 
       let implicants =
         (
@@ -229,12 +242,19 @@ describe("PIT", () => {
             ]
             |> List.map(((i, ts)) => (get(i), ts |> List.map(getI)))
             |> PIT.fromList,
-            (["0_2_8_10", "5_7_13_15", "6_7_14_15", "12_13_14_15"] |> List.map(getI), PIT.empty),
+            (
+              ["0_2_8_10", "5_7_13_15", "6_7_14_15", "12_13_14_15"]
+              |> List.map(getI),
+              PIT.empty,
+            ),
           ),
         ],
         ((input, (expectedEpis, expectedTable))) => {
           let (actualEpis, actualTable) = PIT.reduce(input);
-          expect(List.eqBy(Term.eq, actualEpis, expectedEpis) && PIT.(actualTable |=| expectedTable))
+          expect(
+            List.eqBy(Term.eq, actualEpis, expectedEpis)
+            && PIT.(actualTable |=| expectedTable),
+          )
           |> toEqual(true);
         },
       );
@@ -245,10 +265,15 @@ describe("PIT", () => {
     "solve",
     [
       ([1, 2, 3, 4, 5, 6], ["-10", "0-1", "10-"]),
-      ([0, 2, 8, 5, 6, 10, 12, 7, 13, 14, 15], ["-0-0", "-1-1", "-11-", "11--"]),
+      (
+        [0, 2, 8, 5, 6, 10, 12, 7, 13, 14, 15],
+        ["-0-0", "-1-1", "-11-", "11--"],
+      ),
       ([6, 5, 2, 3], ["101", "-10", "01-"]),
     ]
-    |> List.map(((a, b)) => (a, b |> List.map(Term.fromS) |> Term.S.fromList)),
+    |> List.map(((a, b)) =>
+         (a, b |> List.map(Term.fromS) |> Term.S.fromList)
+       ),
     ((input, expected)) => {
       let actual = solve(input);
       expect(Term.S.(actual |=| expected)) |> toEqual(true);
@@ -268,7 +293,9 @@ describe("PIT", () => {
           (5, ["-01", "10-"]),
           (6, ["-10", "1-0"]),
         ]
-        |> List.map(((i, ss)) => (Term.ofN(i), ss |> List.map(Term.fromS)))
+        |> List.map(((i, ss)) =>
+             (Term.ofN(i), ss |> List.map(Term.fromS))
+           )
         |> PIT.fromList,
         Bool.Or.from(
           [|
@@ -284,7 +311,8 @@ describe("PIT", () => {
     ],
     ((input, expected)) => {
       let actual = PIT.minimizeExpression(input);
-      expect(actual |> Option.map(Bool.eq(expected))) |> toEqual(Some(true));
+      expect(actual |> Option.map(Bool.eq(expected)))
+      |> toEqual(Some(true));
     },
   );
 

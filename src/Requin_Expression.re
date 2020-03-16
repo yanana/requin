@@ -4,6 +4,8 @@ type t('a, 'identity) = [
   | `And(Set.t(t('a, 'identity), 'identity))
   | `Or(Set.t(t('a, 'identity), 'identity))
   | `Literal('a)
+  | `Zero
+  | `One
 ];
 
 module type Comparable = {
@@ -19,6 +21,7 @@ module type E = {
     type t = Belt.Set.t(C.t, C.identity);
     let empty: t;
     let fromList: list(C.t) => t;
+    let fromArray: array(C.t) => t;
   }
   and T: {type nonrec t = t(e, S.C.identity);};
 };
@@ -33,6 +36,7 @@ module Make = (CA: Comparable) : (E with type e = CA.t) => {
     type t = Belt.Set.t(C.t, C.identity);
     let empty: t; // Belt.Set.t(expr(t, C.identity), C.identity);
     let fromList: list(C.t) => t;
+    let fromArray: array(C.t) => t;
   } = {
     module rec C: Belt.Id.Comparable with type t = t(CA.t, C.identity) =
       Belt.Id.MakeComparable({
@@ -48,6 +52,10 @@ module Make = (CA: Comparable) : (E with type e = CA.t) => {
             |> Array.head
             |> Option.getOrElse(0);
           switch (a, b) {
+          | (`Zero, `Zero) => 0
+          | (`Zero, _) => (-1)
+          | (`One, `One) => 0
+          | (`One, _) => (-1)
           | (`Literal(id), `Literal(id')) => CA.compare(id, id')
           | (`Literal(_), _) => (-1)
           | (`And(es), `And(es')) =>
@@ -82,7 +90,9 @@ module Make = (CA: Comparable) : (E with type e = CA.t) => {
     let id: Belt.Id.comparable(C.t, C.identity) = (module C);
     let empty: t = Set.empty((module C));
     let fromList: list(C.t) => t = Set.fromList((module C));
-    let map = (f, identity, es) => es |> Set.toArray |> Array.map(f) |> Set.fromArray(identity);
+    let fromArray: array(C.t) => t = Set.fromArray((module C));
+    let map = (f, identity, es) =>
+      es |> Set.toArray |> Array.map(f) |> Set.fromArray(identity);
   }
   and T: {type nonrec t = t(e, S.C.identity);} = T;
 };

@@ -13,6 +13,9 @@ module Utils = Requin_Utils;
 type t =
   | Term(int, int);
 
+let zero = Term(0, 0);
+let one = Term(-1, 0);
+
 let eq = (a, b) =>
   switch (a, b) {
   | (Term(v, m), Term(v', m')) => v == v' && m == m'
@@ -43,7 +46,8 @@ let toString = (~length=?, e) =>
   | Term(value, mask) =>
     let v = Js'.Int.toStringWithRadix(value, ~radix=2);
     let m = Js'.Int.toStringWithRadix(mask, ~radix=2);
-    let l = length |> Option.getOrElse(max(String.length(v), String.length(m)));
+    let l =
+      length |> Option.getOrElse(max(String.length(v), String.length(m)));
     let (v', m') = Utils.(padStart(l, '0', v), padStart(l, '0', m));
     v' |> String.mapi((i, c) => m'.[i] == '1' ? '-' : c);
   };
@@ -52,7 +56,8 @@ let show: t => string = toString;
 
 let toString' =
   fun
-  | Term(v, m) => "Term(" ++ string_of_int(v) ++ ", " ++ string_of_int(m) ++ ")";
+  | Term(v, m) =>
+    "Term(" ++ string_of_int(v) ++ ", " ++ string_of_int(m) ++ ")";
 
 module Show: BsAbstract.Interface.SHOW with type t = t = {
   type nonrec t = t;
@@ -72,7 +77,9 @@ module S = {
 
   let singleton = v => empty |> Set.add(v);
 
-  let eq: (t, t) => bool = (a, b) => (Set.toList(a), Set.toList(b)) |> uncurry2(List.eq((module Eq)));
+  let eq: (t, t) => bool =
+    (a, b) =>
+      (Set.toList(a), Set.toList(b)) |> uncurry2(List.eq((module Eq)));
 
   module Eq: BsAbstract.Interface.EQ with type t = t = {
     type nonrec t = t;
@@ -86,7 +93,8 @@ module S = {
 
   let show: t => string = Set.toList >> List.show((module Show));
 
-  module Show: BsAbstract.Interface.SHOW with type t = Belt.Set.t(C.t, C.identity) = {
+  module Show:
+    BsAbstract.Interface.SHOW with type t = Belt.Set.t(C.t, C.identity) = {
     type t = Belt.Set.t(C.t, C.identity);
     let show = show;
   };
@@ -208,7 +216,8 @@ let toBooleanExpression: (list(string), t) => string =
   (variables, term) => {
     let s = term |> toString(~length=variables->Belt.List.length);
     let bits = s |> Utils.splitString;
-    let terms = variables |> List.zip(bits) |> List.map(uncurry2(T.fromPair));
+    let terms =
+      variables |> List.zip(bits) |> List.map(uncurry2(T.fromPair));
 
     reorder(terms)
     |> List.foldRight(
