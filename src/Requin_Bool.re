@@ -98,7 +98,6 @@ let minimize = es =>
      );
 
 module Or = {
-  // let from = (es): expr => es->Set.fromArray(~id)->Or;
   let from = es => (es |> Set.fromArray(S.id) |> minimize)->`Or;
 };
 
