@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "bs-abstract": "^1.0.0",
-    "relude": "^0.56.0"
+    "relude": "^0.57.0"
   },
   "devDependencies": {
     "@glennsl/bs-jest": "^0.5.0",
