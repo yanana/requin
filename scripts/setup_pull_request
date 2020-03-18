@@ -23,11 +23,12 @@ run() {
     exit 1
   fi
 
-  local branch="release/v${next_version}"
+  local branch="release/v${next_version}-${uid}"
+  local branch; branch="$(git rev-parse --abbrev-ref HEAD)"
 
   set_output branch "${branch}"
   set_output title "Release v${next_version}"
-  set_output commit-message "release: v${next_version}"
+  set_output commit-message "chore(release): v${next_version}"
 }
 
 main() {

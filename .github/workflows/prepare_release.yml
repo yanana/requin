@@ -20,7 +20,7 @@ jobs:
         id: genchanges
         run: scripts/genchanges
       - name: Run something needed to publish
-        id: pre-release
+        id: prerelease
         run: npm run pre-release
       - name: Setup for Pull Request
         id: setup
@@ -30,7 +30,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           title: ${{ steps.setup.outputs.title }}
-          branch: ${{ steps.pre-release.outputs.branch }}
+          branch: ${{ steps.setup.outputs.branch }}
           body: ${{ steps.genchanges.outputs.changes }}
           labels: release
           base: master

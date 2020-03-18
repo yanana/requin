@@ -2,14 +2,6 @@
 
 set -euo pipefail
 
-setup() {
-  cwd=; cwd="$(cd "$(dirname "$0")" && pwd)"
-}
-
-source_deps() {
-  . "${cwd}/github_actions.sh"
-}
-
 run() {
   if [[ "${GITHUB_ACTIONS:-}" != 'true' ]]; then
     exit 0
@@ -28,14 +20,10 @@ run() {
   local uid; uid="${GITHUB_RUN_ID:-0}-${GITHUB_RUN_NUMBER:-0}-$(date +%s)"
   local branch="release/v${version}-${uid}"
 
-  set_output branch "${branch}"
-
   git checkout -b "${branch}"
 }
 
 main() {
-  setup
-  source_deps
   run "$@"
 }
 
