@@ -2,8 +2,12 @@
 
 set -euo pipefail
 
+setup() {
+  cwd=; cwd="$(cd "$(dirname "$0")" && pwd)"
+}
+
 source_deps() {
-  . github_actions.sh
+  . "${cwd}/github_actions.sh"
 }
 
 run() {
@@ -18,6 +22,7 @@ run() {
 }
 
 main() {
+  setup
   source_deps
   run "$@"
 }

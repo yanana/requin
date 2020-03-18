@@ -2,8 +2,12 @@
 
 set -euo pipefail
 
+setup() {
+  cwd=; cwd="$(cd "$(dirname "$0")" && pwd)"
+}
+
 source_deps() {
-  . git_config.sh
+  . "${cwd}/git_config.sh"
 }
 
 setup() {
@@ -32,6 +36,7 @@ run() {
 }
 
 main() {
+  setup
   check_preconditions
   source_deps
   setup

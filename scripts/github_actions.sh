@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -euo
-
 set_output() {
   local name="$1"
   local value="$2"

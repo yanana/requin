@@ -2,8 +2,12 @@
 
 set -euo pipefail
 
+setup() {
+  cwd=; cwd="$(cd "$(dirname "$0")" && pwd)"
+}
+
 source_deps() {
-  . github_actions.sh
+  . "${cwd}/github_actions.sh"
 }
 
 run() {
@@ -22,7 +26,7 @@ run() {
   local manifest_file="${project_root}/package.json"
   local version; version=$(jq -r .version < "${manifest_file}")
   local uid; uid="${GITHUB_RUN_ID:-0}-${GITHUB_RUN_NUMBER:-0}-$(date +%s)"
-  local branch="${release/v${version}-${uid}"
+  local branch="release/v${version}-${uid}"
 
   set_output branch "${branch}"
 
@@ -30,6 +34,7 @@ run() {
 }
 
 main() {
+  setup
   source_deps
   run "$@"
 }
