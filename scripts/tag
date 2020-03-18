@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source_deps() {
+  . git_config.sh
+}
+
+setup() {
+  git_config
+}
+
+check_preconditions() {
+  if [[ "${GITHUB_ACTIONS:-}" != 'true' ]]; then
+    echo 'This script is intended to be run on GitHub Actions.' 1>&2
+    exit 0
+  fi
+}
+
+run() {
+  local project_root; project_root=$(git rev-parse --show-toplevel)
+
+  local manifest_file="${project_root}/package.json"
+  local version; version=$(jq -r .version < "${manifest_file}")
+  local uid; uid="${GITHUB_RUN_ID:-0}-${GITHUB_RUN_NUMBER:-0}-$(date +%s)"
+
+  local remote="https://x-access-token:${ACCESS_TOKEN:-}@github.com/${GITHUB_REPOSITORY}"
+  local message="chore(release): v${version}"
+
+  git tag -a "v${version}" -m "${message}"
+  git push "${remote}" "v${version}"
+}
+
+main() {
+  check_preconditions
+  source_deps
+  setup
+  run "$@"
+}
+
+main "$@"

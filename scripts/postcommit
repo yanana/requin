@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+run() {
+  if [[ "${GITHUB_ACTIONS:-}" != 'true' ]]; then
+    exit 0
+  fi
+
+  local author_name='github-actions[bot]'
+  local author_email='41898282+github-actions[bot]@users.noreply.github.com'
+  local author="${author_name} <${author_email}>"
+
+  git commit --amend --author "${author}" -C HEAD
+  git push -u origin "$(git rev-parse --abbrev-ref HEAD)"
+}
+
+main() {
+  run "$@"
+}
+
+main "$@"

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source_deps() {
+  . github_actions.sh
+}
+
+run() {
+  if [[ "${GITHUB_ACTIONS:-}" != 'true' ]]; then
+    exit 0
+  fi
+
+  local project_root; project_root=$(git rev-parse --show-toplevel)
+  local manifest_path="${project_root}/package.json"
+  local next_version; next_version="$(jq -r .version < "${manifest_path}")"
+
+  if [[ -z "${next_version:-}" ]]; then
+    exit 1
+  fi
+
+  local branch="release/v${next_version}"
+
+  set_output branch "${branch}"
+  set_output title "Release v${next_version}"
+  set_output commit-message "release: v${next_version}"
+}
+
+main() {
+  source_deps
+  run "$@"
+}
+
+main "$@"

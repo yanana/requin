@@ -10,8 +10,14 @@
   "devDependencies": {
     "@glennsl/bs-jest": "^0.5.0",
     "bs-platform": "^7.2.2",
-    "gentype": "^3.15.0"
+    "conventional-changelog-cli": "^2.0.31",
+    "gentype": "^3.15.0",
+    "standard-version": "^7.1.0"
   },
+  "files": [
+    "src/**/*.re",
+    "src/**/*.js"
+  ],
   "scripts": {
     "clean": "bsb -clean-world",
     "test": "jest",
@@ -19,7 +25,11 @@
     "build:watch": "bsb -clean-world -make-world -w",
     "build:gentype": "gentype",
     "bs:build": "bsb -make-world",
-    "bs:clean": "bsb -clean-world"
+    "bs:clean": "bsb -clean-world",
+    "genchanges": "conventional-changelog",
+    "prepare": "npm run build",
+    "pre-release": "standard-version",
+    "tag": "scripts/tag"
   },
   "repository": {
     "type": "git",
@@ -42,5 +52,14 @@
     "coveragePathIgnorePatterns": [
       "/node_modules/"
     ]
+  },
+  "standard-version": {
+    "skip": {
+      "tag": true
+    },
+    "scripts": {
+      "precommit": "scripts/precommit",
+      "postcommit": "scripts/postcommit"
+    }
   }
 }
