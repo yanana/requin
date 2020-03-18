@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source_deps() {
+  . github_actions.sh
+}
+
+run() {
+  local changes
+  if ! changes=$(npm run -s genchanges -- -u); then
+    exit 1
+  fi
+
+  changes="${changes:-No changes.}"
+
+  set_output changes "${changes}"
+}
+
+main() {
+  source_deps
+  run "$@"
+}
+
+main "$@"
