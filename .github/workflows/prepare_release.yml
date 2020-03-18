@@ -1,0 +1,39 @@
+name: Prepare Release
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Checkout master and all tags
+        run: |
+          git fetch --prune --depth=1 origin +refs/heads/master:refs/remotes/origin/master +refs/tags/*:refs/tags/*
+      - run: |
+        git checkout -b release/
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - run: npm ci
+      - name: Generate changes for use in the pull request
+        id: genchanges
+        run: scripts/genchanges
+      - name: Run something needed to publish
+        id: pre-release
+        run: npm run pre-release
+      - name: Setup for Pull Request
+        id: setup
+        run: scripts/setup_pull_request
+      - name: Create Release Pull Request
+        uses: peter-evans/create-pull-request@v2
+        with:
+          token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          title: ${{ steps.setup.outputs.title }}
+          branch: ${{ steps.pre-release.outputs.branch }}
+          body: ${{ steps.genchanges.outputs.changes }}
+          labels: release
+          base: master
+

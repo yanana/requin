@@ -1,0 +1,15 @@
+name: Tagging
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "startsWith(github.event.head_commit.message, 'chore(release):')"
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+        scripts/tag
+        env:
+          ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
