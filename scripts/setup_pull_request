@@ -23,7 +23,6 @@ run() {
     exit 1
   fi
 
-  local branch="release/v${next_version}-${uid}"
   local branch; branch="$(git rev-parse --abbrev-ref HEAD)"
 
   set_output branch "${branch}"
