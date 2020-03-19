@@ -18,12 +18,13 @@ run() {
   local project_root; project_root=$(git rev-parse --show-toplevel)
   local manifest_path="${project_root}/package.json"
   local next_version; next_version="$(jq -r .version < "${manifest_path}")"
+  local uid; uid="${GITHUB_RUN_ID:-0}-${GITHUB_RUN_NUMBER:-0}-$(date +%s)"
 
   if [[ -z "${next_version:-}" ]]; then
     exit 1
   fi
 
-  local branch; branch="$(git rev-parse --abbrev-ref HEAD)"
+  local branch="release/v${next_version}-${uid}"
 
   set_output branch "${branch}"
   set_output title "Release v${next_version}"
