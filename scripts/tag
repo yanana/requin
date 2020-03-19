@@ -10,7 +10,7 @@ source_deps() {
   . "${cwd}/git_config.sh"
 }
 
-setup() {
+configure_git() {
   git_config
 }
 
@@ -36,9 +36,10 @@ run() {
 }
 
 main() {
+  setup
   check_preconditions
   source_deps
-  setup
+  configure_git
   run "$@"
 }
 
