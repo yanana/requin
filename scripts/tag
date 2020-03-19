@@ -36,7 +36,6 @@ run() {
 }
 
 main() {
-  setup
   check_preconditions
   source_deps
   setup
