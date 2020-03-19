@@ -7,20 +7,11 @@ run() {
     exit 0
   fi
 
-  local project_root; project_root=$(git rev-parse --show-toplevel)
-
   local committer_name='GitHub'
   local committer_email='noreply@github.com'
 
   git config user.name "${committer_name}"
   git config user.email "${committer_email}"
-
-  local manifest_file="${project_root}/package.json"
-  local version; version=$(jq -r .version < "${manifest_file}")
-  local uid; uid="${GITHUB_RUN_ID:-0}-${GITHUB_RUN_NUMBER:-0}-$(date +%s)"
-  local branch="release/v${version}-${uid}"
-
-  git checkout -b "${branch}"
 }
 
 main() {
