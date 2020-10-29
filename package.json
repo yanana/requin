@@ -8,7 +8,7 @@
     "relude": "^0.58.0"
   },
   "devDependencies": {
-    "@glennsl/bs-jest": "^0.5.0",
+    "@glennsl/bs-jest": "^0.6.0",
     "bs-platform": "^7.2.2",
     "conventional-changelog-cli": "^2.0.31",
     "gentype": "^3.16.0",
