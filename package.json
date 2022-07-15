@@ -11,7 +11,7 @@
     "@glennsl/bs-jest": "^0.7.0",
     "bs-platform": "^7.2.2",
     "conventional-changelog-cli": "^2.0.31",
-    "gentype": "^3.16.0",
+    "gentype": "^4.5.0",
     "standard-version": "^8.0.0"
   },
   "files": [
